@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class MyNetworkManager : NetworkManager
 {
+
     public override void OnClientConnect()
     {
         base.OnClientConnect();
@@ -15,17 +16,25 @@ public class MyNetworkManager : NetworkManager
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
         base.OnServerAddPlayer(conn);
-        //Debug.Log ("Player added to Server");
-        //Debug.Log ($"There are now {numPlayers} players");
         
-        MyNetworkPlayer player = conn.identity.GetComponent<MyNetworkPlayer>();
+        if (conn.identity == null)
+        {
+            Debug.LogError("Player object is null on connection!");
+            return;
+        }
+        
+        if (!conn.identity.TryGetComponent<MyNetworkPlayer>(out var player))
+        {
+            Debug.LogError("MyNetworkPlayer component not found on player object!");
+            return;
+        }
+        
+        player.SetDisplayName ($"Player {numPlayers}");
 
-        player.setDisplayName ($"Player {numPlayers}");
+        Color displayColor = new(Random.Range(0f, 1f), Random.Range(0f, 1f),
+        Random.Range(0f, 1f));
 
-        Color displayColor = new Color (Random.Range (0f,1f), Random.Range(0f,1f), 
-        Random.Range(0f,1f));
-
-        player.setDisplayColor (displayColor);
+        player.SetDisplayColor(displayColor);
     }
 
 }
